@@ -51,7 +51,13 @@ export function VenueCarousel({ venues, primaryColor, accentColor }: VenueCarous
           {venues.length > 1 ? 'Event Venues' : 'Venue'}
         </h3>
         
-        <div className="venue-carousel-container">
+        <div className="venue-carousel-container relative">
+          {/* Left gradient fade */}
+          <div className="absolute left-0 top-0 bottom-10 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
+          
+          {/* Right gradient fade */}
+          <div className="absolute right-0 top-0 bottom-10 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
+          
           <Slider {...settings}>
             {venues.map((venue, index) => (
               <div key={venue.id || index} className="px-2">

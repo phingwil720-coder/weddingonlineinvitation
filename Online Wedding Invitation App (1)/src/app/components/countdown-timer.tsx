@@ -54,7 +54,7 @@ export function CountdownTimer({ targetDate, primaryColor, accentColor }: Countd
         <h3 
           className="text-3xl text-center mb-10 font-['Playfair_Display'] font-semibold text-foreground"
         >
-          Counting Down
+          Countdown
         </h3>
         
         <div className="grid grid-cols-4 gap-3">

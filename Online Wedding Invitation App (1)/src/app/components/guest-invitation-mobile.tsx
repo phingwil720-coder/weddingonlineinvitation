@@ -337,15 +337,15 @@ export function GuestInvitationMobile() {
         />
       )}
 
-      {/* Personal Message Section */}
-      <div className="px-6 py-16 bg-secondary">
+      {/* Personalized Message */}
+      <div className="px-6 py-16" style={{ backgroundColor: '#775a4c' }}>
         <div className="max-w-md mx-auto">
           <div className="text-center">
-            <Sparkles className="h-8 w-8 mx-auto mb-6" style={{ color: eventConfig.accent_color }} />
-            <h2 className="text-4xl mb-8 font-['Playfair_Display'] font-semibold text-foreground">
+            <Sparkles className="h-8 w-8 mx-auto mb-6" style={{ color: '#f5f0ea' }} />
+            <h2 className="text-4xl mb-8 font-['Playfair_Display'] font-semibold" style={{ color: '#fdfbf7' }}>
               Dear {guest.name},
             </h2>
-            <p className="text-lg leading-relaxed font-['Cormorant_Garamond'] italic text-foreground">
+            <p className="text-lg leading-relaxed font-['Cormorant_Garamond'] italic" style={{ color: '#f5f0ea' }}>
               {guest.custom_message || eventConfig.universal_message || eventConfig.event_description}
             </p>
           </div>
@@ -468,7 +468,20 @@ export function GuestInvitationMobile() {
                         min="1"
                         max={guest.max_guests}
                         value={formData.guest_count}
-                        onChange={(e) => setFormData({ ...formData, guest_count: parseInt(e.target.value) || 1 })}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          // Allow empty string or valid numbers
+                          setFormData({ 
+                            ...formData, 
+                            guest_count: value === '' ? 0 : parseInt(value) || 0
+                          });
+                        }}
+                        onBlur={(e) => {
+                          // On blur, ensure minimum of 1
+                          if (formData.guest_count < 1) {
+                            setFormData({ ...formData, guest_count: 1 });
+                          }
+                        }}
                         required
                         className="rounded-xl py-6 text-base"
                       />
