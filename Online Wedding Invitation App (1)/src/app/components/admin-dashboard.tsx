@@ -311,67 +311,72 @@ export function AdminDashboard() {
                 Create a personalized invitation for your guest. They'll receive a unique link.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6 mt-6">
               <div>
-                <Label htmlFor="name" className="mb-2 block">Guest Name *</Label>
+                <Label htmlFor="name" className="mb-3 block text-base">Guest Name *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
                   required
                   placeholder="John Doe"
+                  className="h-11"
                 />
               </div>
               
               <div>
-                <Label htmlFor="slug" className="mb-2 block">URL Slug *</Label>
+                <Label htmlFor="slug" className="mb-3 block text-base">URL Slug *</Label>
                 <Input
                   id="slug"
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   required
                   placeholder="johndoe"
+                  className="h-11"
                 />
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-gray-500 mt-3">
                   Invitation link: {window.location.origin}/{formData.slug || 'guest-slug'}
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <div>
-                  <Label htmlFor="email" className="mb-2 block">Email</Label>
+                  <Label htmlFor="email" className="mb-3 block text-base">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder="john@example.com"
+                    className="h-11"
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="phone" className="mb-2 block">Phone</Label>
+                  <Label htmlFor="phone" className="mb-3 block text-base">Phone</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     placeholder="+1 234 567 8900"
+                    className="h-11"
                   />
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="custom_message" className="mb-2 block">Personal Message</Label>
+                <Label htmlFor="custom_message" className="mb-3 block text-base">Personal Message</Label>
                 <Textarea
                   id="custom_message"
                   value={formData.custom_message}
                   onChange={(e) => setFormData({ ...formData, custom_message: e.target.value })}
                   placeholder="Add a personal message for this guest..."
                   rows={3}
+                  className="min-h-[80px]"
                 />
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3 py-2">
                 <Switch
                   id="plus_one"
                   checked={formData.plus_one_allowed}
@@ -381,34 +386,43 @@ export function AdminDashboard() {
                     max_guests: checked ? 2 : 1 
                   })}
                 />
-                <Label htmlFor="plus_one">Allow Plus One</Label>
+                <Label htmlFor="plus_one" className="text-base">Allow Plus One</Label>
               </div>
 
               {formData.plus_one_allowed && (
                 <div>
-                  <Label htmlFor="max_guests" className="mb-2 block">Maximum Guests</Label>
+                  <Label htmlFor="max_guests" className="mb-3 block text-base">Maximum Guests</Label>
                   <Input
                     id="max_guests"
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={formData.max_guests}
+                    type="text"
+                    inputMode="numeric"
+                    value={formData.max_guests.toString()}
                     onChange={(e) => {
-                      const value = e.target.value;
-                      setFormData({ ...formData, max_guests: value === '' ? 1 : parseInt(value) || 1 });
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      if (value === '') {
+                        setFormData({ ...formData, max_guests: 1 });
+                      } else {
+                        const numValue = parseInt(value);
+                        if (numValue >= 1 && numValue <= 10) {
+                          setFormData({ ...formData, max_guests: numValue });
+                        }
+                      }
                     }}
+                    placeholder="2"
+                    className="h-11"
                   />
+                  <p className="text-sm text-gray-500 mt-3">Enter a number between 1 and 10</p>
                 </div>
               )}
 
-              <div className="flex justify-end space-x-2">
+              <div className="flex justify-end space-x-3 pt-4">
                 <Button type="button" variant="outline" onClick={() => {
                   setDialogOpen(false);
                   resetForm();
-                }}>
+                }} className="h-11 px-6">
                   Cancel
                 </Button>
-                <Button type="submit">
+                <Button type="submit" className="h-11 px-6">
                   {editingGuest ? 'Update' : 'Create'} Guest
                 </Button>
               </div>
