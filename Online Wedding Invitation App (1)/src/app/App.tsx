@@ -4,6 +4,7 @@ import { GuestInvitationMobile } from './components/guest-invitation-mobile';
 import { SetupPage } from './components/setup-page';
 import { Toaster } from './components/ui/sonner';
 import { isSupabaseConfigured } from '../lib/supabase';
+import '../styles/index.css';
 
 export default function App() {
   // Check if Supabase is configured
