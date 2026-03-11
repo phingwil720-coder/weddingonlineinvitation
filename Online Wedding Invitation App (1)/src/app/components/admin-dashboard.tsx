@@ -311,9 +311,9 @@ export function AdminDashboard() {
                 Create a personalized invitation for your guest. They'll receive a unique link.
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="name">Guest Name *</Label>
+                <Label htmlFor="name" className="mb-2 block">Guest Name *</Label>
                 <Input
                   id="name"
                   value={formData.name}
@@ -324,7 +324,7 @@ export function AdminDashboard() {
               </div>
               
               <div>
-                <Label htmlFor="slug">URL Slug *</Label>
+                <Label htmlFor="slug" className="mb-2 block">URL Slug *</Label>
                 <Input
                   id="slug"
                   value={formData.slug}
@@ -332,14 +332,14 @@ export function AdminDashboard() {
                   required
                   placeholder="johndoe"
                 />
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 mt-2">
                   Invitation link: {window.location.origin}/{formData.slug || 'guest-slug'}
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="mb-2 block">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -350,7 +350,7 @@ export function AdminDashboard() {
                 </div>
                 
                 <div>
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone" className="mb-2 block">Phone</Label>
                   <Input
                     id="phone"
                     value={formData.phone}
@@ -361,7 +361,7 @@ export function AdminDashboard() {
               </div>
 
               <div>
-                <Label htmlFor="custom_message">Personal Message</Label>
+                <Label htmlFor="custom_message" className="mb-2 block">Personal Message</Label>
                 <Textarea
                   id="custom_message"
                   value={formData.custom_message}
@@ -386,14 +386,17 @@ export function AdminDashboard() {
 
               {formData.plus_one_allowed && (
                 <div>
-                  <Label htmlFor="max_guests">Maximum Guests</Label>
+                  <Label htmlFor="max_guests" className="mb-2 block">Maximum Guests</Label>
                   <Input
                     id="max_guests"
                     type="number"
                     min="1"
                     max="10"
                     value={formData.max_guests}
-                    onChange={(e) => setFormData({ ...formData, max_guests: parseInt(e.target.value) || 1 })}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setFormData({ ...formData, max_guests: value === '' ? 1 : parseInt(value) || 1 });
+                    }}
                   />
                 </div>
               )}
