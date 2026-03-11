@@ -38,6 +38,9 @@ export function AdminDashboardMobile() {
     plus_one_allowed: false,
     max_guests: 1,
   });
+  
+  // Separate state for max_guests input to allow empty string on mobile
+  const [maxGuestsInput, setMaxGuestsInput] = useState('1');
 
   useEffect(() => {
     const isAuth = localStorage.getItem('admin_authenticated') === 'true';
@@ -141,6 +144,7 @@ export function AdminDashboardMobile() {
       plus_one_allowed: guest.plus_one_allowed,
       max_guests: guest.max_guests,
     });
+    setMaxGuestsInput(guest.max_guests.toString());
     setDialogOpen(true);
   };
 
@@ -188,6 +192,7 @@ export function AdminDashboardMobile() {
       plus_one_allowed: false,
       max_guests: 1,
     });
+    setMaxGuestsInput('1');
     setEditingGuest(null);
   };
 
@@ -411,98 +416,118 @@ export function AdminDashboardMobile() {
                 Create a personalized invitation
               </DialogDescription>
             </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-6 mt-4">
               <div>
-                <Label htmlFor="name">Guest Name *</Label>
+                <Label htmlFor="name" className="mb-3 block text-base">Guest Name *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => handleNameChange(e.target.value)}
                   required
                   placeholder="John Doe"
-                  className="rounded-xl"
+                  className="rounded-xl h-12 text-base"
                 />
               </div>
               
               <div>
-                <Label htmlFor="slug">URL Slug *</Label>
+                <Label htmlFor="slug" className="mb-3 block text-base">URL Slug *</Label>
                 <Input
                   id="slug"
                   value={formData.slug}
                   onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                   required
                   placeholder="johndoe"
-                  className="rounded-xl"
+                  className="rounded-xl h-12 text-base"
                 />
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs text-slate-500 mt-2">
                   Link: .../{formData.slug || 'guest-slug'}
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="mb-3 block text-base">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   placeholder="john@example.com"
-                  className="rounded-xl"
+                  className="rounded-xl h-12 text-base"
                 />
               </div>
 
               <div>
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="phone" className="mb-3 block text-base">Phone</Label>
                 <Input
                   id="phone"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                   placeholder="+1 234 567 8900"
-                  className="rounded-xl"
+                  className="rounded-xl h-12 text-base"
                 />
               </div>
 
               <div>
-                <Label htmlFor="custom_message">Personal Message</Label>
+                <Label htmlFor="custom_message" className="mb-3 block text-base">Personal Message</Label>
                 <Textarea
                   id="custom_message"
                   value={formData.custom_message}
                   onChange={(e) => setFormData({ ...formData, custom_message: e.target.value })}
                   placeholder="Add a personal message..."
-                  rows={3}
-                  className="rounded-xl resize-none"
+                  rows={4}
+                  className="rounded-xl resize-none text-base min-h-[100px]"
                 />
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3 py-2">
                 <Switch
                   id="plus_one"
                   checked={formData.plus_one_allowed}
-                  onCheckedChange={(checked) => setFormData({ 
-                    ...formData, 
-                    plus_one_allowed: checked,
-                    max_guests: checked ? 2 : 1 
-                  })}
+                  onCheckedChange={(checked) => {
+                    setFormData({ 
+                      ...formData, 
+                      plus_one_allowed: checked,
+                      max_guests: checked ? 2 : 1 
+                    });
+                    setMaxGuestsInput(checked ? '2' : '1');
+                  }}
                 />
-                <Label htmlFor="plus_one">Allow Plus One</Label>
+                <Label htmlFor="plus_one" className="text-base">Allow Plus One</Label>
               </div>
 
               {formData.plus_one_allowed && (
                 <div>
-                  <Label htmlFor="max_guests">Maximum Guests</Label>
+                  <Label htmlFor="max_guests" className="mb-3 block text-base">Maximum Guests</Label>
                   <Input
                     id="max_guests"
-                    type="number"
-                    min="1"
-                    max="10"
-                    value={formData.max_guests}
-                    onChange={(e) => setFormData({ ...formData, max_guests: parseInt(e.target.value) || 1 })}
-                    className="rounded-xl"
+                    type="text"
+                    inputMode="numeric"
+                    value={maxGuestsInput}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      setMaxGuestsInput(value);
+                      if (value !== '') {
+                        const numValue = parseInt(value);
+                        if (numValue >= 1 && numValue <= 10) {
+                          setFormData({ ...formData, max_guests: numValue });
+                        }
+                      }
+                    }}
+                    onBlur={() => {
+                      // Set to 1 if empty on blur
+                      if (maxGuestsInput === '') {
+                        setMaxGuestsInput('1');
+                        setFormData({ ...formData, max_guests: 1 });
+                      }
+                    }}
+                    placeholder="2"
+                    className="rounded-xl h-12 text-base"
                   />
+                  <p className="text-xs text-slate-500 mt-2">Enter a number between 1 and 10</p>
                 </div>
               )}
 
-              <div className="flex gap-2 pt-4">
+              <div className="flex gap-3 pt-4">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -510,13 +535,13 @@ export function AdminDashboardMobile() {
                     setDialogOpen(false);
                     resetForm();
                   }}
-                  className="flex-1 rounded-full"
+                  className="flex-1 rounded-full h-12"
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit"
-                  className="flex-1 rounded-full"
+                  className="flex-1 rounded-full h-12"
                   style={{ backgroundColor: eventConfig?.primary_color || '#9333ea' }}
                 >
                   {editingGuest ? 'Update' : 'Create'}
