@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FloralDecoration } from './floral-decoration';
 
 interface CountdownTimerProps {
   targetDate: string;
@@ -49,10 +50,12 @@ export function CountdownTimer({ targetDate, primaryColor, accentColor }: Countd
   ];
 
   return (
-    <div className="px-6 py-16 bg-secondary">
-      <div className="max-w-md mx-auto">
+    <div className="px-6 py-16 bg-secondary bg-[#e4cec9] relative overflow-hidden">
+      <FloralDecoration variant="flower" position="top-right" size="sm" opacity={0.35} color="#7A9173" />
+      <FloralDecoration variant="leaf" position="bottom-left" size="sm" opacity={0.3} color="#C3968C" />
+      <div className="max-w-md mx-auto relative z-10">
         <h3 
-          className="text-3xl text-center mb-10 font-['Playfair_Display'] font-semibold text-foreground"
+          className="text-center mb-10 font-['Playfair_Display'] font-semibold text-foreground font-bold text-[#443730] font-[Birthstone] text-[52px]"
         >
           Countdown
         </h3>
@@ -61,14 +64,14 @@ export function CountdownTimer({ targetDate, primaryColor, accentColor }: Countd
           {timeUnits.map((unit, index) => (
             <div 
               key={unit.label}
-              className="bg-white rounded-2xl p-4 shadow-sm border border-border flex flex-col items-center justify-center"
+              className="bg-white rounded-2xl p-4 shadow-sm border border-border flex flex-col items-center justify-center bg-[#fefcfc]"
             >
               <div 
-                className="text-3xl font-bold font-['Playfair_Display'] mb-1 text-foreground"
+                className="text-3xl font-bold font-['Playfair_Display'] mb-1 text-foreground text-[#443730]"
               >
                 {unit.value.toString().padStart(2, '0')}
               </div>
-              <div className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+              <div className="text-xs uppercase tracking-wider text-muted-foreground font-medium text-[#443730]">
                 {unit.label}
               </div>
             </div>

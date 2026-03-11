@@ -14,6 +14,7 @@ import { PrenupCarousel } from './prenup-carousel';
 import { VenueCarousel } from './venue-carousel';
 import { DressCodeSection } from './dress-code-section';
 import { FAQsSection } from './faqs-section';
+import { FloralDecoration } from './floral-decoration';
 
 export function GuestInvitationMobile() {
   const { slug } = useParams<{ slug: string }>();
@@ -203,10 +204,10 @@ export function GuestInvitationMobile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-slate-800 mx-auto"></div>
-          <p className="mt-4 text-slate-600 font-['Montserrat']">Loading your invitation...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground font-['Montserrat']">Loading your invitation...</p>
         </div>
       </div>
     );
@@ -214,10 +215,10 @@ export function GuestInvitationMobile() {
 
   if (!guest) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white p-6">
+      <div className="min-h-screen flex items-center justify-center bg-background p-6">
         <div className="text-center">
-          <h2 className="text-2xl mb-4 font-['Playfair_Display']">Invitation Not Found</h2>
-          <p className="text-slate-600 font-['Montserrat']">
+          <h2 className="text-2xl mb-4 font-['Playfair_Display'] text-foreground">Invitation Not Found</h2>
+          <p className="text-muted-foreground font-['Montserrat']">
             Sorry, we couldn't find an invitation with this link.
           </p>
         </div>
@@ -338,14 +339,16 @@ export function GuestInvitationMobile() {
       )}
 
       {/* Personalized Message */}
-      <div className="px-6 py-16" style={{ backgroundColor: '#775a4c' }}>
-        <div className="max-w-md mx-auto">
+      <div className="px-6 py-16 bg-accent bg-[#bd988a] relative overflow-hidden">
+        <FloralDecoration variant="branch" position="top-left" size="md" opacity={0.35} color="#ffffff" />
+        <FloralDecoration variant="vine" position="bottom-right" size="sm" opacity={0.3} color="#ffffff" />
+        <div className="max-w-md mx-auto relative z-10">
           <div className="text-center">
-            <Sparkles className="h-8 w-8 mx-auto mb-6" style={{ color: '#f5f0ea' }} />
-            <h2 className="text-4xl mb-8 font-['Playfair_Display'] font-semibold" style={{ color: '#fdfbf7' }}>
+            <Sparkles className="h-8 w-8 mx-auto mb-6 text-white/90" />
+            <h2 className="text-4xl mb-8 font-['Playfair_Display'] font-semibold text-white">
               Dear {guest.name},
             </h2>
-            <p className="text-lg leading-relaxed font-['Cormorant_Garamond'] italic" style={{ color: '#f5f0ea' }}>
+            <p className="text-lg leading-relaxed font-['Cormorant_Garamond'] italic text-white/90">
               {guest.custom_message || eventConfig.universal_message || eventConfig.event_description}
             </p>
           </div>
@@ -378,8 +381,10 @@ export function GuestInvitationMobile() {
       )}
 
       {/* RSVP Section */}
-      <div className="px-6 py-16 bg-white">
-        <div className="max-w-md mx-auto">
+      <div className="px-6 py-16 bg-white relative overflow-hidden bg-[#ffffff]">
+        <FloralDecoration variant="flower" position="top-left" size="lg" opacity={0.25} color="#7A9173" />
+        <FloralDecoration variant="vine" position="bottom-right" size="md" opacity={0.28} color="#7A9173" />
+        <div className="max-w-md mx-auto relative z-10">
           {submitted && !showRSVPForm ? (
             <div className="text-center py-12">
               <div 
@@ -388,10 +393,10 @@ export function GuestInvitationMobile() {
               >
                 <CheckCircle className="h-12 w-12" style={{ color: eventConfig.primary_color }} />
               </div>
-              <h3 className="text-3xl mb-4 font-['Playfair_Display'] font-semibold" style={{ color: '#4b382f' }}>
+              <h3 className="text-3xl mb-4 font-['Playfair_Display'] font-semibold text-foreground">
                 {formData.attending === 'yes' ? "We'll See You There!" : "Thank You"}
               </h3>
-              <p className="text-lg mb-8" style={{ color: '#4b382f', opacity: 0.8 }}>
+              <p className="text-lg mb-8 text-muted-foreground">
                 {formData.attending === 'yes' 
                   ? "We're so excited to celebrate with you!"
                   : "Thank you for letting us know. You'll be missed!"}
@@ -399,8 +404,7 @@ export function GuestInvitationMobile() {
               <Button 
                 onClick={() => setShowRSVPForm(true)}
                 variant="outline"
-                className="rounded-full px-8 py-6 text-base"
-                style={{ borderColor: eventConfig.primary_color, color: eventConfig.primary_color }}
+                className="rounded-full px-8 py-6 text-base border-primary text-primary hover:bg-primary/5"
               >
                 Update Response
               </Button>
@@ -408,10 +412,10 @@ export function GuestInvitationMobile() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-8">
               <div className="text-center mb-10">
-                <h3 className="text-3xl mb-3 font-['Playfair_Display'] font-semibold" style={{ color: '#4b382f' }}>
+                <h3 className="mb-3 font-['Playfair_Display'] font-semibold text-foreground text-[40px]">
                   RSVP
                 </h3>
-                <p style={{ color: '#4b382f', opacity: 0.8 }}>
+                <p className="text-muted-foreground">
                   Please respond by {rsvpDeadline.toLocaleDateString('en-US', { 
                     month: 'long',
                     day: 'numeric',
@@ -421,7 +425,7 @@ export function GuestInvitationMobile() {
               </div>
 
               <div>
-                <Label className="text-base mb-4 block" style={{ color: '#4b382f' }}>Will you be attending?</Label>
+                <Label className="text-base mb-4 block text-foreground">Will you be attending?</Label>
                 <RadioGroup
                   value={formData.attending}
                   onValueChange={(value) => setFormData({ ...formData, attending: value })}
@@ -431,24 +435,24 @@ export function GuestInvitationMobile() {
                   <div 
                     className="flex items-center space-x-4 p-5 rounded-2xl border-2 transition-all cursor-pointer active:scale-[0.98]"
                     style={{ 
-                      borderColor: formData.attending === 'yes' ? eventConfig.primary_color : 'rgba(75, 56, 47, 0.15)',
+                      borderColor: formData.attending === 'yes' ? eventConfig.primary_color : 'rgba(92, 74, 71, 0.15)',
                       backgroundColor: formData.attending === 'yes' ? `${eventConfig.primary_color}08` : 'white'
                     }}
                   >
                     <RadioGroupItem value="yes" id="yes" />
-                    <Label htmlFor="yes" className="flex-1 cursor-pointer text-base">
+                    <Label htmlFor="yes" className="flex-1 cursor-pointer text-base text-foreground">
                       ✓ Joyfully Accepts
                     </Label>
                   </div>
                   <div 
                     className="flex items-center space-x-4 p-5 rounded-2xl border-2 transition-all cursor-pointer active:scale-[0.98]"
                     style={{ 
-                      borderColor: formData.attending === 'no' ? eventConfig.primary_color : 'rgba(75, 56, 47, 0.15)',
+                      borderColor: formData.attending === 'no' ? eventConfig.primary_color : 'rgba(92, 74, 71, 0.15)',
                       backgroundColor: formData.attending === 'no' ? `${eventConfig.primary_color}08` : 'white'
                     }}
                   >
                     <RadioGroupItem value="no" id="no" />
-                    <Label htmlFor="no" className="flex-1 cursor-pointer text-base">
+                    <Label htmlFor="no" className="flex-1 cursor-pointer text-base text-foreground">
                       Regretfully Declines
                     </Label>
                   </div>
@@ -459,7 +463,7 @@ export function GuestInvitationMobile() {
                 <div className="space-y-6 pt-4">
                   {guest.plus_one_allowed && (
                     <div>
-                      <Label htmlFor="guest_count" className="text-base mb-3 block" style={{ color: '#4b382f' }}>
+                      <Label htmlFor="guest_count" className="text-base mb-3 block text-foreground">
                         Number of Guests
                       </Label>
                       <Input
@@ -485,7 +489,7 @@ export function GuestInvitationMobile() {
                         required
                         className="rounded-xl py-6 text-base"
                       />
-                      <p className="text-sm mt-2" style={{ color: '#4b382f', opacity: 0.6 }}>
+                      <p className="text-sm mt-2 text-muted-foreground">
                         Maximum {guest.max_guests} guest{guest.max_guests > 1 ? 's' : ''}
                       </p>
                     </div>
@@ -493,7 +497,7 @@ export function GuestInvitationMobile() {
 
                   {formData.guest_count > 1 && (
                     <div>
-                      <Label htmlFor="guest_names" className="text-base mb-3 block" style={{ color: '#4b382f' }}>
+                      <Label htmlFor="guest_names" className="text-base mb-3 block text-foreground">
                         Guest Names
                       </Label>
                       <Input
@@ -508,15 +512,14 @@ export function GuestInvitationMobile() {
 
                   {eventConfig.show_meal_preferences && (
                     <div>
-                      <Label htmlFor="meal_preference" className="text-base mb-3 block" style={{ color: '#4b382f' }}>
+                      <Label htmlFor="meal_preference" className="text-base mb-3 block text-foreground">
                         Meal Preference
                       </Label>
                       <select
                         id="meal_preference"
                         value={formData.meal_preference}
                         onChange={(e) => setFormData({ ...formData, meal_preference: e.target.value })}
-                        className="w-full px-4 py-4 border rounded-xl text-base bg-white"
-                        style={{ borderColor: 'rgba(75, 56, 47, 0.15)', color: '#4b382f' }}
+                        className="w-full px-4 py-4 border border-border rounded-xl text-base bg-white text-foreground"
                       >
                         <option value="">Select meal preference</option>
                         <option value="Chicken">Chicken</option>
@@ -530,7 +533,7 @@ export function GuestInvitationMobile() {
 
                   {eventConfig.show_dietary_restrictions && (
                     <div>
-                      <Label htmlFor="dietary_restrictions" className="text-base mb-3 block" style={{ color: '#4b382f' }}>
+                      <Label htmlFor="dietary_restrictions" className="text-base mb-3 block text-foreground">
                         Dietary Restrictions
                       </Label>
                       <Input
@@ -545,7 +548,7 @@ export function GuestInvitationMobile() {
 
                   {eventConfig.show_song_requests && (
                     <div>
-                      <Label htmlFor="song_request" className="text-base mb-3 block" style={{ color: '#4b382f' }}>
+                      <Label htmlFor="song_request" className="text-base mb-3 block text-foreground">
                         Song Request
                       </Label>
                       <Input
@@ -561,7 +564,7 @@ export function GuestInvitationMobile() {
               )}
 
               <div>
-                <Label htmlFor="message" className="text-base mb-3 block" style={{ color: '#4b382f' }}>
+                <Label htmlFor="message" className="text-base mb-3 block text-foreground">
                   Message to the Couple (Optional)
                 </Label>
                 <Textarea
@@ -576,9 +579,9 @@ export function GuestInvitationMobile() {
 
               <Button 
                 type="submit" 
-                className="w-full py-7 text-lg rounded-full shadow-lg active:scale-[0.98] transition-transform"
+                className="w-full py-7 text-lg rounded-full shadow-lg active:scale-[0.98] transition-transform text-white hover:opacity-90"
                 disabled={submitting}
-                style={{ backgroundColor: eventConfig.primary_color, color: '#4b382f' }}
+                style={{ backgroundColor: eventConfig.primary_color }}
               >
                 {submitting ? 'Submitting...' : 'Submit RSVP'}
               </Button>
@@ -588,11 +591,16 @@ export function GuestInvitationMobile() {
       </div>
 
       {/* Footer */}
-      <div className="text-center py-16 px-6 bg-secondary">
-        <Heart className="h-6 w-6 mx-auto mb-3" style={{ color: eventConfig.accent_color }} />
-        <p className="font-['Playfair_Display'] text-lg text-foreground">
-          We can't wait to celebrate with you!
-        </p>
+      <div className="text-center py-16 px-6 bg-secondary bg-[#bd988a] relative overflow-hidden">
+        <div className="relative z-10">
+          <Heart className="h-8 w-8 mx-auto mb-4" style={{ color: eventConfig.accent_color }} />
+          <p className="font-['Playfair_Display'] text-xl text-foreground text-[#ffffff] mb-2">
+            We can't wait to celebrate with you!
+          </p>
+          <p className="font-['Montserrat'] text-sm text-[#ffffff] opacity-90 mt-4">
+            With love and gratitude
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import { FAQ } from '../../lib/supabase';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from './ui/accordion';
 import { HelpCircle } from 'lucide-react';
+import { FloralDecoration } from './floral-decoration';
 
 interface FAQsSectionProps {
   faqs: FAQ[];
@@ -13,8 +14,10 @@ export function FAQsSection({ faqs, primaryColor }: FAQsSectionProps) {
   }
 
   return (
-    <div className="px-6 py-16 bg-white">
-      <div className="max-w-md mx-auto">
+    <div className="px-6 py-16 bg-white bg-[#f9f4f3] relative overflow-hidden">
+      <FloralDecoration variant="branch" position="top-left" size="md" opacity={0.28} color="#C3968C" />
+      <FloralDecoration variant="flower" position="bottom-right" size="sm" opacity={0.25} color="#7A9173" />
+      <div className="max-w-md mx-auto relative z-10">
         <div className="text-center mb-10">
           <div 
             className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6"
@@ -23,10 +26,10 @@ export function FAQsSection({ faqs, primaryColor }: FAQsSectionProps) {
             <HelpCircle className="h-8 w-8" style={{ color: primaryColor }} />
           </div>
           
-          <h3 className="text-3xl mb-3 font-['Playfair_Display'] font-semibold text-foreground">
+          <h3 className="text-3xl mb-3 font-['Playfair_Display'] font-semibold text-foreground text-[#443730]">
             Frequently Asked Questions
           </h3>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-[#443730]">
             Here are answers to some common questions
           </p>
         </div>
@@ -36,10 +39,10 @@ export function FAQsSection({ faqs, primaryColor }: FAQsSectionProps) {
             <AccordionItem 
               key={faq.id || index} 
               value={`item-${index}`}
-              className="bg-secondary rounded-2xl border border-border px-6 overflow-hidden"
+              className="bg-secondary rounded-2xl border border-border px-6 overflow-hidden bg-[#e4cec9]"
             >
               <AccordionTrigger className="text-left hover:no-underline py-5">
-                <span className="text-base font-medium text-foreground pr-4">
+                <span className="text-base font-medium text-foreground pr-4 text-[#443730]">
                   {faq.question}
                 </span>
               </AccordionTrigger>

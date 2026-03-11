@@ -1,8 +1,7 @@
 import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
 import { MapPin, Clock, ExternalLink } from 'lucide-react';
 import { Venue } from '../../lib/supabase';
+import { FloralDecoration } from './floral-decoration';
 
 interface VenueCarouselProps {
   venues: Venue[];
@@ -26,7 +25,7 @@ export function VenueCarousel({ venues, primaryColor, accentColor }: VenueCarous
     pauseOnHover: true,
     arrows: false,
     centerMode: true,
-    centerPadding: '60px',
+    centerPadding: '80px',
     dotsClass: 'slick-dots venue-custom-dots',
     customPaging: () => (
       <div 
@@ -43,77 +42,73 @@ export function VenueCarousel({ venues, primaryColor, accentColor }: VenueCarous
   };
 
   return (
-    <div className="px-6 py-16 bg-white">
-      <div className="max-w-md mx-auto">
+    <div className="py-16 bg-white bg-[#f9f4f3] relative overflow-hidden">
+      <FloralDecoration variant="flower" position="top-left" size="md" opacity={0.3} color="#C3968C" />
+      <FloralDecoration variant="vine" position="bottom-right" size="sm" opacity={0.25} color="#7A9173" />
+      <div className="max-w-md mx-auto px-6 relative z-10">
         <h3 
-          className="text-3xl text-center mb-10 font-['Playfair_Display'] font-semibold text-foreground"
+          className="text-center mb-10 font-['Playfair_Display'] font-semibold text-foreground font-[Birthstone] text-[48px] text-[#443730]"
         >
           {venues.length > 1 ? 'Event Venues' : 'Venue'}
         </h3>
+      </div>
         
-        <div className="venue-carousel-container relative">
-          {/* Left gradient fade */}
-          <div className="absolute left-0 top-0 bottom-10 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-          
-          {/* Right gradient fade */}
-          <div className="absolute right-0 top-0 bottom-10 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-          
-          <Slider {...settings}>
-            {venues.map((venue, index) => (
-              <div key={venue.id || index} className="px-2">
-                <div 
-                  className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-lg cursor-pointer group"
-                  onClick={() => handleVenueClick(venue.google_maps_link)}
-                >
-                  {/* Venue Image with Overlay */}
-                  <div className="absolute inset-0">
-                    {venue.image_url ? (
-                      <img 
-                        src={venue.image_url} 
-                        alt={venue.venue_name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div 
-                        className="w-full h-full"
-                        style={{ backgroundColor: `${primaryColor}20` }}
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
-                  </div>
+      <div className="venue-carousel-container relative z-10">
+        <Slider {...settings}>
+          {venues.map((venue, index) => (
+            <div key={venue.id || index} className="px-2">
+              <div 
+                className="relative aspect-[4/3] rounded-3xl overflow-hidden shadow-lg cursor-pointer group"
+                onClick={() => handleVenueClick(venue.google_maps_link)}
+              >
+                {/* Venue Image with Overlay */}
+                <div className="absolute inset-0">
+                  {venue.image_url ? (
+                    <img 
+                      src={venue.image_url} 
+                      alt={venue.venue_name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div 
+                      className="w-full h-full"
+                      style={{ backgroundColor: `${primaryColor}20` }}
+                    />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20" />
+                </div>
 
-                  {/* Venue Details Overlay */}
-                  <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
-                    <h4 className="text-2xl font-['Playfair_Display'] font-semibold mb-3">
-                      {venue.venue_name}
-                    </h4>
-                    
-                    <div className="space-y-2 mb-4">
-                      <div className="flex items-start gap-2">
-                        <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm leading-relaxed">{venue.venue_address}</p>
-                      </div>
-                      
-                      {venue.venue_time && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-5 w-5 flex-shrink-0" />
-                          <p className="text-sm">{venue.venue_time}</p>
-                        </div>
-                      )}
+                {/* Venue Details Overlay */}
+                <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
+                  <h4 className="text-2xl font-['Playfair_Display'] font-semibold mb-3">
+                    {venue.venue_name}
+                  </h4>
+                  
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                      <p className="text-sm leading-relaxed">{venue.venue_address}</p>
                     </div>
-
-                    {venue.google_maps_link && (
-                      <div className="flex items-center gap-2 text-sm opacity-90 group-hover:opacity-100 transition-opacity">
-                        <ExternalLink className="h-4 w-4" />
-                        <span>Tap to view on Google Maps</span>
+                    
+                    {venue.venue_time && (
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-5 w-5 flex-shrink-0" />
+                        <p className="text-sm">{venue.venue_time}</p>
                       </div>
                     )}
                   </div>
+
+                  {venue.google_maps_link && (
+                    <div className="flex items-center gap-2 text-sm opacity-90 group-hover:opacity-100 transition-opacity">
+                      <ExternalLink className="h-4 w-4" />
+                      <span>Tap to view on Google Maps</span>
+                    </div>
+                  )}
                 </div>
               </div>
-            ))}
-          </Slider>
-        </div>
+            </div>
+          ))}
+        </Slider>
       </div>
 
       <style>{`
@@ -137,8 +132,8 @@ export function VenueCarousel({ venues, primaryColor, accentColor }: VenueCarous
         
         .venue-carousel-container .slick-slide {
           transition: all 300ms ease;
-          opacity: 0.4;
-          transform: scale(0.85);
+          opacity: 0.5;
+          transform: scale(0.9);
         }
         
         .venue-carousel-container .slick-slide.slick-center {

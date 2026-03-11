@@ -214,7 +214,7 @@ export function AdminDashboard() {
   };
 
   const stats = {
-    total: guests.length,
+    total: guests.reduce((sum, guest) => sum + guest.max_guests, 0),
     confirmed: rsvps.filter(r => r.attending).length,
     declined: rsvps.filter(r => !r.attending).length,
     pending: guests.length - rsvps.length,

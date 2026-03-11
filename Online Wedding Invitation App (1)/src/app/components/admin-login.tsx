@@ -10,8 +10,8 @@ interface AdminLoginProps {
   onLogin: () => void;
 }
 
-// Hardcoded passcode - change this to your preferred code
-const ADMIN_PASSCODE = '2026';
+// Use environment variable for passcode, fallback to default for development
+const ADMIN_PASSCODE = import.meta.env.VITE_ADMIN_PASSCODE || 'admin2026';
 
 export function AdminLogin({ onLogin }: AdminLoginProps) {
   const [passcode, setPasscode] = useState('');

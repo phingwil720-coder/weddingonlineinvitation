@@ -1,15 +1,16 @@
 import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
 import { useState } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { FloralDecoration } from './floral-decoration';
 
 interface PrenupCarouselProps {
   images: string[];
   primaryColor: string;
+  secondaryColor: string;
+  textColor: string;
 }
 
-export function PrenupCarousel({ images, primaryColor }: PrenupCarouselProps) {
+export function PrenupCarousel({ images, primaryColor, secondaryColor, textColor }: PrenupCarouselProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -28,7 +29,7 @@ export function PrenupCarousel({ images, primaryColor }: PrenupCarouselProps) {
     pauseOnHover: true,
     arrows: false,
     centerMode: true,
-    centerPadding: '60px',
+    centerPadding: '80px',
     dotsClass: 'slick-dots custom-dots',
     customPaging: () => (
       <div 
@@ -59,40 +60,35 @@ export function PrenupCarousel({ images, primaryColor }: PrenupCarouselProps) {
 
   return (
     <>
-      <div className="px-6 py-16 bg-white">
-        <div className="max-w-md mx-auto">
+      <div className="py-16 bg-[#f9f4f3] relative overflow-hidden" style={{ backgroundColor: secondaryColor }}>
+        <FloralDecoration variant="vine" position="top-right" size="md" opacity={0.28} color="#C3968C" />
+        <FloralDecoration variant="flower" position="bottom-left" size="sm" opacity={0.25} color="#7A9173" />
+        <div className="max-w-md mx-auto px-6 relative z-10">
           <h3 
-            className="text-3xl text-center mb-10 font-['Playfair_Display'] font-semibold text-foreground"
-          >
-            Our Journey
-          </h3>
-          
-          <div className="prenup-carousel-container relative">
-            {/* Left gradient fade */}
-            <div className="absolute left-0 top-0 bottom-10 w-20 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-            
-            {/* Right gradient fade */}
-            <div className="absolute right-0 top-0 bottom-10 w-20 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-            
-            <Slider {...settings}>
-              {images.map((imageUrl, index) => (
-                <div key={index} className="px-2">
-                  <div 
-                    className="aspect-[3/4] rounded-3xl overflow-hidden shadow-lg cursor-pointer hover:opacity-95 transition-opacity"
-                    onClick={() => openLightbox(index)}
-                  >
-                    <img 
-                      src={imageUrl} 
-                      alt={`Couple photo ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              ))}
-            </Slider>
-          </div>
+            className="text-center font-['Playfair_Display'] font-semibold mx-[0px] mt-[0px] mb-[40px] font-[Birthstone] text-[48px] text-[#443730]"
+            style={{ color: textColor }}
+          >25 Years of Love</h3>
         </div>
-
+        
+        <div className="prenup-carousel-container relative z-10">
+          <Slider {...settings}>
+            {images.map((imageUrl, index) => (
+              <div key={index} className="px-2">
+                <div 
+                  className="aspect-[3/4] rounded-3xl overflow-hidden shadow-lg cursor-pointer hover:opacity-95 transition-opacity"
+                  onClick={() => openLightbox(index)}
+                >
+                  <img 
+                    src={imageUrl} 
+                    alt={`Couple photo ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            ))}
+          </Slider>
+        </div>
+        
         <style>{`
           .prenup-carousel-container .slick-dots {
             bottom: -40px;
@@ -114,8 +110,8 @@ export function PrenupCarousel({ images, primaryColor }: PrenupCarouselProps) {
           
           .prenup-carousel-container .slick-slide {
             transition: all 300ms ease;
-            opacity: 0.4;
-            transform: scale(0.85);
+            opacity: 0.5;
+            transform: scale(0.9);
           }
           
           .prenup-carousel-container .slick-slide.slick-center {

@@ -1,21 +1,26 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import { supabase, PrenupImage, Venue, FAQ, DressCodeColor } from '../../lib/supabase';
-import { deleteImage, extractPathFromUrl } from '../../lib/storage';
+import { deleteImage } from '../../lib/storage';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Textarea } from './ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { toast } from 'sonner';
-import { Plus, Trash2, Image as ImageIcon, MapPin, HelpCircle, Palette } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, MapPin, HelpCircle, Palette, ChevronDown, ChevronUp, Edit, Brush } from 'lucide-react';
 import { ImageUpload } from './image-upload';
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from './ui/sheet';
 
 export function AdminContentManager() {
+  const navigate = useNavigate();
   const [prenupImages, setPrenupImages] = useState<PrenupImage[]>([]);
   const [venues, setVenues] = useState<Venue[]>([]);
-  const [faqs, setFaqs] = useState<FAQ[]>([]);
+  const [faqs, setFAQs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingVenueId, setEditingVenueId] = useState<string | null>(null);
+  const [editingVenue, setEditingVenue] = useState<Venue | null>(null);
+  const [prenupPreviewExpanded, setPrenupPreviewExpanded] = useState(true);
+  const [editSheetOpen, setEditSheetOpen] = useState(false);
 
   // Form states
   const [newVenue, setNewVenue] = useState({
@@ -28,7 +33,17 @@ export function AdminContentManager() {
   });
   const [newFaq, setNewFaq] = useState({ question: '', answer: '' });
   const [dressCodeColors, setDressCodeColors] = useState<DressCodeColor[]>([]);
-  const [newColor, setNewColor] = useState({ name: '', color: '#8B7355' });
+  const [newColor, setNewColor] = useState({ name: '', color: '#7A9173' });
+
+  // Edit venue form state
+  const [editVenueForm, setEditVenueForm] = useState({
+    venue_name: '',
+    venue_address: '',
+    venue_time: '',
+    image_url: '',
+    image_path: '',
+    google_maps_link: '',
+  });
 
   useEffect(() => {
     loadData();
@@ -54,7 +69,7 @@ export function AdminContentManager() {
         .from('faqs')
         .select('*')
         .order('order_index');
-      setFaqs(faqData || []);
+      setFAQs(faqData || []);
 
       const { data: configData } = await supabase
         .from('event_config')
@@ -92,12 +107,10 @@ export function AdminContentManager() {
 
   const deletePrenupImage = async (id: string, imagePath?: string) => {
     try {
-      // Delete from storage if path exists
       if (imagePath) {
         await deleteImage(imagePath);
       }
 
-      // Delete from database
       const { error } = await supabase.from('prenup_images').delete().eq('id', id);
       if (error) throw error;
       
@@ -111,6 +124,10 @@ export function AdminContentManager() {
   // Venues
   const handleVenueImageUpload = (url: string, path: string) => {
     setNewVenue({ ...newVenue, image_url: url, image_path: path });
+  };
+
+  const handleEditVenueImageUpload = (url: string, path: string) => {
+    setEditVenueForm({ ...editVenueForm, image_url: url, image_path: path });
   };
 
   const addVenue = async () => {
@@ -140,14 +157,48 @@ export function AdminContentManager() {
     }
   };
 
+  const openEditVenue = (venue: Venue) => {
+    setEditingVenue(venue);
+    setEditVenueForm({
+      venue_name: venue.venue_name,
+      venue_address: venue.venue_address,
+      venue_time: venue.venue_time || '',
+      image_url: venue.image_url || '',
+      image_path: venue.image_path || '',
+      google_maps_link: venue.google_maps_link || '',
+    });
+    setEditSheetOpen(true);
+  };
+
+  const updateVenue = async () => {
+    if (!editingVenue) return;
+    if (!editVenueForm.venue_name || !editVenueForm.venue_address) {
+      toast.error('Please enter venue name and address');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('venues')
+        .update(editVenueForm)
+        .eq('id', editingVenue.id);
+
+      if (error) throw error;
+      toast.success('Venue updated successfully');
+      setEditSheetOpen(false);
+      setEditingVenue(null);
+      loadData();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update venue');
+    }
+  };
+
   const deleteVenue = async (id: string, imagePath?: string) => {
     try {
-      // Delete image from storage if exists
       if (imagePath) {
         await deleteImage(imagePath);
       }
 
-      // Delete from database
       const { error } = await supabase.from('venues').delete().eq('id', id);
       if (error) throw error;
       
@@ -206,7 +257,7 @@ export function AdminContentManager() {
 
       if (error) throw error;
       toast.success('Color added successfully');
-      setNewColor({ name: '', color: '#8B7355' });
+      setNewColor({ name: '', color: '#7A9173' });
       loadData();
     } catch (error: any) {
       toast.error(error.message || 'Failed to add color');
@@ -238,11 +289,34 @@ export function AdminContentManager() {
       {/* Prenup Images Section */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ImageIcon className="h-5 w-5" />
-            Prenup Photos Carousel
-          </CardTitle>
-          <CardDescription>Upload photos for the couple's photo carousel</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <ImageIcon className="h-5 w-5" />
+                Prenup Photos Carousel
+              </CardTitle>
+              <CardDescription>Upload photos for the couple's photo carousel</CardDescription>
+            </div>
+            {prenupImages.length > 0 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setPrenupPreviewExpanded(!prenupPreviewExpanded)}
+              >
+                {prenupPreviewExpanded ? (
+                  <>
+                    <ChevronUp className="h-4 w-4 mr-2" />
+                    Minimize Preview
+                  </>
+                ) : (
+                  <>
+                    <ChevronDown className="h-4 w-4 mr-2" />
+                    Show Preview
+                  </>
+                )}
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent className="space-y-4">
           <ImageUpload
@@ -252,25 +326,33 @@ export function AdminContentManager() {
             multiple={true}
           />
 
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            {prenupImages.map((img) => (
-              <div key={img.id} className="relative group">
-                <img
-                  src={img.image_url}
-                  alt="Prenup"
-                  className="w-full aspect-[3/4] object-cover rounded-lg"
-                />
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => deletePrenupImage(img.id, img.image_path)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
+          {prenupPreviewExpanded && (
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              {prenupImages.map((img) => (
+                <div key={img.id} className="relative group">
+                  <img
+                    src={img.image_url}
+                    alt="Prenup"
+                    className="w-full aspect-[3/4] object-cover rounded-lg"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => deletePrenupImage(img.id, img.image_path)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!prenupPreviewExpanded && prenupImages.length > 0 && (
+            <p className="text-center text-slate-500 py-4">
+              {prenupImages.length} photo{prenupImages.length !== 1 ? 's' : ''} uploaded
+            </p>
+          )}
 
           {prenupImages.length === 0 && (
             <p className="text-center text-slate-500 py-8">No photos uploaded yet</p>
@@ -352,7 +434,7 @@ export function AdminContentManager() {
                     className="w-full h-32 object-cover"
                   />
                 )}
-                <div className="p-4 flex justify-between items-start">
+                <div className="p-4 flex justify-between items-start gap-3">
                   <div className="flex-1">
                     <p className="font-medium">{venue.venue_name}</p>
                     <p className="text-sm text-slate-600">{venue.venue_address}</p>
@@ -360,13 +442,22 @@ export function AdminContentManager() {
                       <p className="text-sm text-slate-500 mt-1">{venue.venue_time}</p>
                     )}
                   </div>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => deleteVenue(venue.id, venue.image_path)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditVenue(venue)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => deleteVenue(venue.id, venue.image_path)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -496,6 +587,75 @@ export function AdminContentManager() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Venue Sheet */}
+      <Sheet open={editSheetOpen} onOpenChange={setEditSheetOpen}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto px-6">
+          <SheetHeader>
+            <SheetTitle>Edit Venue</SheetTitle>
+            <SheetDescription>
+              Update the venue information
+            </SheetDescription>
+          </SheetHeader>
+          <div className="space-y-4 mt-6">
+            <div>
+              <Label>Venue Name *</Label>
+              <Input
+                placeholder="Grand Ballroom"
+                value={editVenueForm.venue_name}
+                onChange={(e) => setEditVenueForm({ ...editVenueForm, venue_name: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Venue Address *</Label>
+              <Input
+                placeholder="123 Main Street, City, State"
+                value={editVenueForm.venue_address}
+                onChange={(e) => setEditVenueForm({ ...editVenueForm, venue_address: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Time</Label>
+              <Input
+                placeholder="6:00 PM - 10:00 PM"
+                value={editVenueForm.venue_time}
+                onChange={(e) => setEditVenueForm({ ...editVenueForm, venue_time: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Google Maps Link</Label>
+              <Input
+                placeholder="https://maps.google.com/..."
+                value={editVenueForm.google_maps_link}
+                onChange={(e) => setEditVenueForm({ ...editVenueForm, google_maps_link: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label>Venue Photo</Label>
+              <ImageUpload
+                onUploadComplete={handleEditVenueImageUpload}
+                folder="venues"
+                buttonText={editVenueForm.image_url ? 'Change Photo' : 'Upload Venue Photo'}
+              />
+              {editVenueForm.image_url && (
+                <img
+                  src={editVenueForm.image_url}
+                  alt="Venue preview"
+                  className="mt-2 w-full h-40 object-cover rounded-lg"
+                />
+              )}
+            </div>
+            <div className="flex gap-3 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => setEditSheetOpen(false)}>
+                Cancel
+              </Button>
+              <Button className="flex-1" onClick={updateVenue}>
+                Save Changes
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

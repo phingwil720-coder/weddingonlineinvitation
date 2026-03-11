@@ -1,22 +1,111 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
+
+// Type definitions
+export interface Guest {
+  id: string;
+  name: string;
+  slug: string;
+  email?: string;
+  phone?: string;
+  custom_message?: string;
+  plus_one_allowed: boolean;
+  max_guests: number;
+  created_at?: string;
+}
+
+export interface RSVP {
+  id: string;
+  guest_id: string;
+  attending: boolean;
+  guest_count: number;
+  message?: string;
+  meal_preference?: string;
+  dietary_restrictions?: string;
+  song_request?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface EventConfig {
+  id?: string;
+  couple_names: string;
+  event_type: string;
+  event_date: string;
+  event_time: string;
+  venue_name: string;
+  venue_address: string;
+  dress_code: string;
+  dress_code_colors?: DressCodeColor[];
+  dress_code_description?: string;
+  primary_color: string;
+  accent_color: string;
+  hero_image_url: string;
+  monogram_icon_url?: string;
+  monogram_icon_path?: string;
+  welcome_message: string;
+  event_description: string;
+  additional_info: string;
+  rsvp_deadline: string;
+  show_meal_preferences: boolean;
+  show_dietary_restrictions: boolean;
+  show_song_requests: boolean;
+  design_config?: any;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface PrenupImage {
+  id: string;
+  image_url: string;
+  image_path?: string;
+  order_index: number;
+  created_at?: string;
+}
+
+export interface Venue {
+  id: string;
+  venue_name: string;
+  venue_address: string;
+  venue_time?: string;
+  image_url?: string;
+  image_path?: string;
+  google_maps_link?: string;
+  order_index: number;
+  created_at?: string;
+}
+
+export interface FAQ {
+  id: string;
+  question: string;
+  answer: string;
+  order_index: number;
+  created_at?: string;
+}
+
+export interface DressCodeColor {
+  name: string;
+  color: string;
+}
 
 // Supabase project credentials
-// TEMPORARY: Hardcoded for Vercel deployment testing
-// TODO: Move back to environment variables once working
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'postgresql://postgres:Happy@wil&pia720@db.zalvkvhvzaekbplxqpii.supabase.co:5432/postgres';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InphbHZrdmh2emFla2JwbHhxcGlpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3MDQ5MjAsImV4cCI6MjA4NjI4MDkyMH0.dB6mSo2odgyChRHZTZIYkuXHIWR-7VIzdvMhsKMp1NE';
+// Use the HTTP URL, not the postgres connection string
+const supabaseUrl =
+  import.meta.env.VITE_SUPABASE_URL || "";
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
 // Check if Supabase is configured
 export const isSupabaseConfigured = () => {
-  const configured = supabaseUrl && 
-         supabaseAnonKey && 
-         supabaseUrl !== 'postgresql://postgres:Happy@wil&pia720@db.zalvkvhvzaekbplxqpii.supabase.co:5432/postgres' && 
-         supabaseUrl.startsWith('http');
-  
+  const configured =
+    supabaseUrl &&
+    supabaseAnonKey &&
+    supabaseUrl.startsWith("http") &&
+    supabaseAnonKey.length > 20;
+
   return configured;
 };
 
 // Only create client if properly configured
-export const supabase = isSupabaseConfigured() 
+export const supabase = isSupabaseConfigured()
   ? createClient(supabaseUrl, supabaseAnonKey)
-  : null as any; // Will be handled by setup check
+  : (null as any); // Will be handled by setup check
