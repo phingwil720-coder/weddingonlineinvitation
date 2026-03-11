@@ -89,10 +89,8 @@ export interface DressCodeColor {
 
 // Supabase project credentials
 // Use the HTTP URL, not the postgres connection string
-const supabaseUrl =
-  import.meta.env.VITE_SUPABASE_URL || "";
-const supabaseAnonKey =
-  import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
 // Check if Supabase is configured
 export const isSupabaseConfigured = () => {

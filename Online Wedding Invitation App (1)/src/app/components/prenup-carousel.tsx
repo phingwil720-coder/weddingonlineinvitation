@@ -65,7 +65,7 @@ export function PrenupCarousel({ images, primaryColor, secondaryColor, textColor
         <FloralDecoration variant="flower" position="bottom-left" size="sm" opacity={0.25} color="#7A9173" />
         <div className="max-w-md mx-auto px-6 relative z-10">
           <h3 
-            className="text-center font-['Playfair_Display'] font-semibold mx-[0px] mt-[0px] mb-[40px] font-[Birthstone] text-[48px] text-[#443730]"
+            className="text-center mx-[0px] mt-[0px] mb-[40px] font-[Birthstone] text-[48px] text-[#443730]"
             style={{ color: textColor }}
           >25 Years of Love</h3>
         </div>

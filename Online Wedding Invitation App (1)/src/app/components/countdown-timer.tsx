@@ -55,7 +55,7 @@ export function CountdownTimer({ targetDate, primaryColor, accentColor }: Countd
       <FloralDecoration variant="leaf" position="bottom-left" size="sm" opacity={0.3} color="#C3968C" />
       <div className="max-w-md mx-auto relative z-10">
         <h3 
-          className="text-center mb-10 font-['Playfair_Display'] font-semibold text-foreground font-bold text-[#443730] font-[Birthstone] text-[52px]"
+          className="text-center mb-10 font-[Birthstone] text-[52px] text-[#443730]"
         >
           Countdown
         </h3>

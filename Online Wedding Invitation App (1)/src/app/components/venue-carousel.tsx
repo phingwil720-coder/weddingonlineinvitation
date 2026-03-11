@@ -25,7 +25,7 @@ export function VenueCarousel({ venues, primaryColor, accentColor }: VenueCarous
     pauseOnHover: true,
     arrows: false,
     centerMode: true,
-    centerPadding: '80px',
+    centerPadding: '40px',
     dotsClass: 'slick-dots venue-custom-dots',
     customPaging: () => (
       <div 
@@ -47,7 +47,7 @@ export function VenueCarousel({ venues, primaryColor, accentColor }: VenueCarous
       <FloralDecoration variant="vine" position="bottom-right" size="sm" opacity={0.25} color="#7A9173" />
       <div className="max-w-md mx-auto px-6 relative z-10">
         <h3 
-          className="text-center mb-10 font-['Playfair_Display'] font-semibold text-foreground font-[Birthstone] text-[48px] text-[#443730]"
+          className="text-center mb-10 font-[Birthstone] text-[48px] text-[#443730]"
         >
           {venues.length > 1 ? 'Event Venues' : 'Venue'}
         </h3>

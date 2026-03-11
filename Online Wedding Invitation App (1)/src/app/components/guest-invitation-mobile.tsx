@@ -15,6 +15,7 @@ import { VenueCarousel } from './venue-carousel';
 import { DressCodeSection } from './dress-code-section';
 import { FAQsSection } from './faqs-section';
 import { FloralDecoration } from './floral-decoration';
+import { EnvelopeOpening } from './envelope-opening';
 
 export function GuestInvitationMobile() {
   const { slug } = useParams<{ slug: string }>();
@@ -31,6 +32,7 @@ export function GuestInvitationMobile() {
   const [clickCount, setClickCount] = useState(0);
   const [showRSVPForm, setShowRSVPForm] = useState(false);
   const [parallaxOffset, setParallaxOffset] = useState(0);
+  const [envelopeOpened, setEnvelopeOpened] = useState(false);
   
   const [formData, setFormData] = useState({
     attending: '',
@@ -232,6 +234,14 @@ export function GuestInvitationMobile() {
 
   return (
     <div className="min-h-screen bg-white font-['Montserrat']">
+      {/* Envelope overlay on first load */}
+      {!envelopeOpened && (
+        <EnvelopeOpening
+          monogramUrl={eventConfig.monogram_icon_url}
+          onOpen={() => setEnvelopeOpened(true)}
+        />
+      )}
+
       {/* Hero Section - Full-Screen Photo with Guest Name */}
       <div 
         className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-6 py-20"

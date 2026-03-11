@@ -126,6 +126,7 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Montserrat', sans-serif;
   }
 
   /* Hide scrollbar */
@@ -151,24 +152,28 @@
     font-size: var(--text-2xl);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
+    font-family: 'Playfair Display', serif;
   }
 
   h2 {
     font-size: var(--text-xl);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
+    font-family: 'Playfair Display', serif;
   }
 
   h3 {
     font-size: var(--text-lg);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
+    font-family: 'Cormorant Garamond', serif;
   }
 
   h4 {
     font-size: var(--text-base);
     font-weight: var(--font-weight-medium);
     line-height: 1.5;
+    font-family: 'Cormorant Garamond', serif;
   }
 
   label {

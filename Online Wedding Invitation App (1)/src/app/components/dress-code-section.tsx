@@ -32,7 +32,7 @@ export function DressCodeSection({
             <Sparkles className="h-8 w-8" style={{ color: primaryColor }} />
           </div>
           
-          <h3 className="mb-4 font-['Playfair_Display'] font-semibold text-foreground font-[Birthstone] font-bold text-[48px] text-[#443730]">
+          <h3 className="mb-4 font-[Birthstone] text-[48px] text-[#443730]">
             Dress Code
           </h3>
           
