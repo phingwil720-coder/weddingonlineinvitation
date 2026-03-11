@@ -313,10 +313,23 @@ export function AdminDashboardMobile() {
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
                         <h3 className="font-semibold text-lg mb-1">{guest.name}</h3>
-                        <Badge variant="outline" className="gap-1 text-xs">
-                          <StatusIcon className="h-3 w-3" />
-                          {status.status}
-                        </Badge>
+                        <div className="flex gap-2 flex-wrap">
+                          <Badge variant="outline" className="gap-1 text-xs">
+                            <StatusIcon className="h-3 w-3" />
+                            {status.status}
+                          </Badge>
+                          <Badge 
+                            variant="outline" 
+                            className="gap-1 text-xs"
+                            style={{
+                              borderColor: guest.plus_one_allowed ? '#7A9173' : '#94a3b8',
+                              backgroundColor: guest.plus_one_allowed ? '#7A917310' : '#f1f5f9',
+                              color: guest.plus_one_allowed ? '#7A9173' : '#64748b'
+                            }}
+                          >
+                            {guest.plus_one_allowed ? `+${guest.max_guests - 1}` : 'Solo'}
+                          </Badge>
+                        </div>
                       </div>
                     </div>
 
@@ -497,7 +510,7 @@ export function AdminDashboardMobile() {
 
               {formData.plus_one_allowed && (
                 <div>
-                  <Label htmlFor="max_guests" className="mb-3 block text-base">Maximum Guests</Label>
+                  <Label htmlFor="max_guests" className="mb-3 block text-base">Total Party Size</Label>
                   <Input
                     id="max_guests"
                     type="text"
@@ -523,7 +536,7 @@ export function AdminDashboardMobile() {
                     placeholder="2"
                     className="rounded-xl h-12 text-base"
                   />
-                  <p className="text-xs text-slate-500 mt-2">Enter a number between 1 and 10</p>
+                  <p className="text-xs text-slate-500 mt-2">Total attendees including the primary guest (1-10)</p>
                 </div>
               )}
 
