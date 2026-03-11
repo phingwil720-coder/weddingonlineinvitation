@@ -474,7 +474,7 @@ export function GuestInvitationMobile() {
                   {guest.plus_one_allowed && (
                     <div>
                       <Label htmlFor="guest_count" className="text-base mb-3 block text-foreground">
-                        Number of Guests
+                        How many people total? (including you)
                       </Label>
                       <Input
                         id="guest_count"
@@ -500,7 +500,7 @@ export function GuestInvitationMobile() {
                         className="rounded-xl py-6 text-base"
                       />
                       <p className="text-sm mt-2 text-muted-foreground">
-                        Maximum {guest.max_guests} guest{guest.max_guests > 1 ? 's' : ''}
+                        You can bring up to {guest.max_guests} {guest.max_guests === 1 ? 'person' : 'people'} total
                       </p>
                     </div>
                   )}
