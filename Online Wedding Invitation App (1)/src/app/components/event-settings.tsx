@@ -1,3 +1,13 @@
+import { useState, useEffect } from 'react';
+import { supabase, EventConfig } from '../../lib/supabase';
+import { Button } from './ui/button';
+import { Input } from './ui/input';
+import { Label } from './ui/label';
+import { Textarea } from './ui/textarea';
+import { Switch } from './ui/switch';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { toast } from 'sonner';
 import { Save, Palette, Calendar, Settings, FileText } from 'lucide-react';
 import { defaultEventConfig } from '../../lib/event-config';
 import { ImageUpload } from './image-upload';
