@@ -1,16 +1,7 @@
-import { useState, useEffect } from 'react';
-import { supabase, EventConfig } from '../../lib/supabase';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
-import { Switch } from './ui/switch';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { toast } from 'sonner';
 import { Save, Palette, Calendar, Settings, FileText } from 'lucide-react';
 import { defaultEventConfig } from '../../lib/event-config';
 import { ImageUpload } from './image-upload';
+import { MusicUpload } from './music-upload';
 
 interface EventSettingsProps {
   eventConfig?: EventConfig | null;
@@ -364,6 +355,36 @@ export function EventSettings({ eventConfig: initialConfig, onConfigUpdate }: Ev
               )}
               <p className="text-xs text-slate-500 mt-2">
                 Upload your custom monogram (recommended: square PNG with transparent background)
+              </p>
+            </div>
+
+            <div>
+              <Label>Background Music</Label>
+              <MusicUpload
+                onUploadComplete={(url, path) => setConfig({ ...config, background_music_url: url, background_music_path: path })}
+                folder="music"
+                buttonText={config.background_music_url ? 'Change Music' : 'Upload Music'}
+              />
+              {config.background_music_url && (
+                <div className="mt-3 p-4 bg-slate-50 rounded-lg">
+                  <audio controls className="w-full">
+                    <source src={config.background_music_url} />
+                    Your browser does not support the audio element.
+                  </audio>
+                  <div className="mt-3 flex items-center justify-between bg-white p-3 rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium">Auto-play music</p>
+                      <p className="text-xs text-slate-500">Music starts when guests open the invitation</p>
+                    </div>
+                    <Switch
+                      checked={config.music_autoplay || false}
+                      onCheckedChange={(checked) => setConfig({ ...config, music_autoplay: checked })}
+                    />
+                  </div>
+                </div>
+              )}
+              <p className="text-xs text-slate-500 mt-2">
+                Upload background music for the invitation (recommended: soft instrumental)
               </p>
             </div>
           </TabsContent>
