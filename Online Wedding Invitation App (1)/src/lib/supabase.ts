@@ -42,6 +42,9 @@ export interface EventConfig {
   hero_image_url: string;
   monogram_icon_url?: string;
   monogram_icon_path?: string;
+  background_music_url?: string;
+  background_music_path?: string;
+  music_autoplay?: boolean;
   welcome_message: string;
   event_description: string;
   additional_info: string;
