@@ -10,6 +10,7 @@ export interface Guest {
   custom_message?: string;
   plus_one_allowed: boolean;
   max_guests: number;
+  link_sent: boolean;
   created_at?: string;
 }
 
