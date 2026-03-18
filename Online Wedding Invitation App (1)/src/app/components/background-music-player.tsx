@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Volume2, VolumeX, Pause, Play } from 'lucide-react';
+import { VolumeX, Volume2 } from 'lucide-react';
 import { Button } from './ui/button';
 
 interface BackgroundMusicPlayerProps {
@@ -10,7 +10,6 @@ interface BackgroundMusicPlayerProps {
 export function BackgroundMusicPlayer({ musicUrl, autoplay = false }: BackgroundMusicPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
 
   useEffect(() => {
@@ -68,16 +67,8 @@ export function BackgroundMusicPlayer({ musicUrl, autoplay = false }: Background
     }
   };
 
-  const toggleMute = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    audio.muted = !audio.muted;
-    setIsMuted(!isMuted);
-  };
-
   return (
-    <div className="fixed bottom-6 left-6 z-40 flex gap-2">
+    <div className="fixed bottom-6 left-6 z-40">
       <audio ref={audioRef} src={musicUrl} />
       
       <Button
@@ -88,27 +79,11 @@ export function BackgroundMusicPlayer({ musicUrl, autoplay = false }: Background
         aria-label={isPlaying ? 'Pause music' : 'Play music'}
       >
         {isPlaying ? (
-          <Pause className="h-4 w-4 text-slate-700" />
+          <Volume2 className="h-4 w-4 text-slate-700" />
         ) : (
-          <Play className="h-4 w-4 text-slate-700" />
+          <VolumeX className="h-4 w-4 text-slate-700" />
         )}
       </Button>
-
-      {isPlaying && (
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={toggleMute}
-          className="rounded-full w-10 h-10 p-0 bg-white/90 backdrop-blur-sm border-slate-200 shadow-lg hover:bg-white"
-          aria-label={isMuted ? 'Unmute music' : 'Mute music'}
-        >
-          {isMuted ? (
-            <VolumeX className="h-4 w-4 text-slate-700" />
-          ) : (
-            <Volume2 className="h-4 w-4 text-slate-700" />
-          )}
-        </Button>
-      )}
     </div>
   );
 }
