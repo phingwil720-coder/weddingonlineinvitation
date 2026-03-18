@@ -10,12 +10,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Checkbox } from './ui/checkbox';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Copy, CheckCircle, XCircle, Clock, Eye, LogOut, Users, Settings as SettingsIcon, Menu, Heart, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Copy, CheckCircle, XCircle, Clock, Eye, LogOut, Users, Settings as SettingsIcon, Menu, Heart, Image as ImageIcon, Search } from 'lucide-react';
 import { DatabaseSetupAlert } from './database-setup-alert';
 import { AdminLogin } from './admin-login';
 import { EventSettings } from './event-settings';
 import { AdminContentManager } from './admin-content-manager';
+import { MarkSentDialog } from './mark-sent-dialog';
 
 export function AdminDashboardMobile() {
   const navigate = useNavigate();
@@ -28,6 +30,14 @@ export function AdminDashboardMobile() {
   const [editingGuest, setEditingGuest] = useState<Guest | null>(null);
   const [showDatabaseSetup, setShowDatabaseSetup] = useState(false);
   const [activeTab, setActiveTab] = useState('guests');
+
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sentFilter, setSentFilter] = useState<'all' | 'sent' | 'not-sent'>('all');
+  
+  // Mark sent dialog state
+  const [markSentDialogOpen, setMarkSentDialogOpen] = useState(false);
+  const [guestToMarkSent, setGuestToMarkSent] = useState<Guest | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -166,19 +176,52 @@ export function AdminDashboardMobile() {
     }
   };
 
-  const copyInvitationLink = (slug: string) => {
+  const copyInvitationLink = (slug: string, guest: Guest) => {
     const link = `${window.location.origin}/${slug}`;
     
     if (navigator.clipboard && window.isSecureContext) {
       navigator.clipboard.writeText(link)
         .then(() => {
           toast.success('Link copied!');
+          // Show mark as sent dialog
+          const skipDialog = localStorage.getItem('skip_mark_sent_dialog') === 'true';
+          if (!skipDialog && !guest.link_sent) {
+            setGuestToMarkSent(guest);
+            setMarkSentDialogOpen(true);
+          }
         })
         .catch(() => {
           toast.success(`Link: ${link}`, { duration: 5000 });
         });
     } else {
       toast.success(`Link: ${link}`, { duration: 5000 });
+    }
+  };
+
+  const toggleLinkSent = async (guestId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('guests')
+        .update({ link_sent: !currentStatus })
+        .eq('id', guestId);
+
+      if (error) throw error;
+
+      // Update local state
+      setGuests(guests.map(g => 
+        g.id === guestId ? { ...g, link_sent: !currentStatus } : g
+      ));
+
+      toast.success(`Marked as ${!currentStatus ? 'sent' : 'not sent'}`);
+    } catch (error) {
+      console.error('Error updating link_sent:', error);
+      toast.error('Failed to update status');
+    }
+  };
+
+  const handleMarkSentConfirm = async () => {
+    if (guestToMarkSent) {
+      await toggleLinkSent(guestToMarkSent.id, guestToMarkSent.link_sent);
     }
   };
 
@@ -235,6 +278,28 @@ export function AdminDashboardMobile() {
       </div>
     );
   }
+
+  // Filter and search guests
+  const filteredGuests = guests.filter(guest => {
+    // Apply search filter
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch = 
+      guest.name.toLowerCase().includes(searchLower) ||
+      guest.email?.toLowerCase().includes(searchLower) ||
+      guest.phone?.toLowerCase().includes(searchLower) ||
+      guest.custom_message?.toLowerCase().includes(searchLower);
+
+    if (!matchesSearch) return false;
+
+    // Apply sent filter
+    if (sentFilter === 'sent') return guest.link_sent;
+    if (sentFilter === 'not-sent') return !guest.link_sent;
+    return true; // 'all'
+  });
+
+  // Calculate filter counts
+  const sentCount = guests.filter(g => g.link_sent).length;
+  const notSentCount = guests.filter(g => !g.link_sent).length;
 
   return (
     <div className="min-h-screen bg-white font-['Montserrat']">
@@ -301,8 +366,49 @@ export function AdminDashboardMobile() {
 
           {/* Guests Tab */}
           <TabsContent value="guests" className="space-y-4">
+            {/* Search Bar */}
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  placeholder="Search guests..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 rounded-xl h-11"
+                />
+              </div>
+            </div>
+
+            {/* Filter Buttons */}
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+              <Button
+                variant={sentFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSentFilter('all')}
+                className="rounded-full whitespace-nowrap"
+              >
+                All ({guests.length})
+              </Button>
+              <Button
+                variant={sentFilter === 'not-sent' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSentFilter('not-sent')}
+                className="rounded-full whitespace-nowrap"
+              >
+                Not Sent ({notSentCount})
+              </Button>
+              <Button
+                variant={sentFilter === 'sent' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setSentFilter('sent')}
+                className="rounded-full whitespace-nowrap"
+              >
+                Sent ({sentCount})
+              </Button>
+            </div>
+
             {/* Guest Cards - Mobile Optimized */}
-            {guests.map((guest) => {
+            {filteredGuests.map((guest) => {
               const rsvp = getGuestRSVP(guest.id);
               const status = getRSVPStatus(guest.id);
               const StatusIcon = status.icon;
@@ -312,7 +418,28 @@ export function AdminDashboardMobile() {
                   <CardContent className="p-4">
                     <div className="flex justify-between items-start mb-3">
                       <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-1">{guest.name}</h3>
+                        <div className="flex items-start gap-2">
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg mb-1">{guest.name}</h3>
+                          </div>
+                          <div className="flex items-center gap-1 mt-1">
+                            <Checkbox
+                              checked={guest.link_sent}
+                              onCheckedChange={() => toggleLinkSent(guest.id, guest.link_sent)}
+                              id={`sent-mobile-${guest.id}`}
+                            />
+                            <Label
+                              htmlFor={`sent-mobile-${guest.id}`}
+                              className="text-xs cursor-pointer"
+                            >
+                              {guest.link_sent ? (
+                                <span className="text-green-600">✓ Sent</span>
+                              ) : (
+                                <span className="text-slate-400">Not sent</span>
+                              )}
+                            </Label>
+                          </div>
+                        </div>
                         <div className="flex gap-2 flex-wrap">
                           <Badge variant="outline" className="gap-1 text-xs">
                             <StatusIcon className="h-3 w-3" />
@@ -356,7 +483,7 @@ export function AdminDashboardMobile() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => copyInvitationLink(guest.slug)}
+                        onClick={() => copyInvitationLink(guest.slug, guest)}
                         className="flex-1 rounded-full"
                       >
                         <Copy className="h-4 w-4 mr-1" />
@@ -384,7 +511,7 @@ export function AdminDashboardMobile() {
               );
             })}
 
-            {guests.length === 0 && (
+            {filteredGuests.length === 0 && (
               <div className="text-center py-12 text-slate-500">
                 <Users className="h-12 w-12 mx-auto mb-4 text-slate-300" />
                 <p>No guests added yet</p>
@@ -564,6 +691,14 @@ export function AdminDashboardMobile() {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Mark Sent Dialog */}
+      <MarkSentDialog
+        open={markSentDialogOpen}
+        onOpenChange={setMarkSentDialogOpen}
+        guestName={guestToMarkSent?.name || ''}
+        onConfirm={handleMarkSentConfirm}
+      />
     </div>
   );
 }
