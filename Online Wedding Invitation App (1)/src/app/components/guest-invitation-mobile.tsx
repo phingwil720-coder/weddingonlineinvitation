@@ -1,14 +1,3 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
-import { supabase, Guest, RSVP, EventConfig, PrenupImage, Venue, FAQ } from '../../lib/supabase';
-import { Button } from './ui/button';
-import { Input } from './ui/input';
-import { Label } from './ui/label';
-import { Textarea } from './ui/textarea';
-import { RadioGroup, RadioGroupItem } from './ui/radio-group';
-import { toast } from 'sonner';
-import { Heart, Calendar, MapPin, Clock, CheckCircle, Sparkles, ChevronDown } from 'lucide-react';
-import { defaultEventConfig } from '../../lib/event-config';
 import { CountdownTimer } from './countdown-timer';
 import { PrenupCarousel } from './prenup-carousel';
 import { VenueCarousel } from './venue-carousel';
@@ -16,6 +5,7 @@ import { DressCodeSection } from './dress-code-section';
 import { FAQsSection } from './faqs-section';
 import { FloralDecoration } from './floral-decoration';
 import { EnvelopeOpening } from './envelope-opening';
+import { BackgroundMusicPlayer } from './background-music-player';
 
 export function GuestInvitationMobile() {
   const { slug } = useParams<{ slug: string }>();
@@ -612,6 +602,14 @@ export function GuestInvitationMobile() {
           </p>
         </div>
       </div>
+
+      {/* Background Music Player */}
+      {eventConfig.background_music_url && (
+        <BackgroundMusicPlayer 
+          musicUrl={eventConfig.background_music_url}
+          autoplay={eventConfig.music_autoplay}
+        />
+      )}
     </div>
   );
 }
