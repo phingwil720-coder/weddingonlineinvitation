@@ -11,11 +11,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { Checkbox } from './ui/checkbox';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Copy, CheckCircle, XCircle, Clock, Eye, LogOut, Users, Settings as SettingsIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Copy, CheckCircle, XCircle, Clock, Eye, LogOut, Users, Settings as SettingsIcon, Search } from 'lucide-react';
 import { DatabaseSetupAlert } from './database-setup-alert';
 import { AdminLogin } from './admin-login';
 import { EventSettings } from './event-settings';
+import { MarkSentDialog } from './mark-sent-dialog';
 
 export function AdminDashboard() {
   const navigate = useNavigate();
@@ -29,6 +31,14 @@ export function AdminDashboard() {
   const [showDatabaseSetup, setShowDatabaseSetup] = useState(false);
   const [activeTab, setActiveTab] = useState('guests');
 
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sentFilter, setSentFilter] = useState<'all' | 'sent' | 'not-sent'>('all');
+  
+  // Mark sent dialog state
+  const [markSentDialogOpen, setMarkSentDialogOpen] = useState(false);
+  const [guestToMarkSent, setGuestToMarkSent] = useState<Guest | null>(null);
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -39,6 +49,9 @@ export function AdminDashboard() {
     plus_one_allowed: false,
     max_guests: 1,
   });
+  
+  // Separate state for max_guests input to allow empty string
+  const [maxGuestsInput, setMaxGuestsInput] = useState('1');
 
   // Check authentication on mount
   useEffect(() => {
@@ -148,6 +161,7 @@ export function AdminDashboard() {
       plus_one_allowed: guest.plus_one_allowed,
       max_guests: guest.max_guests,
     });
+    setMaxGuestsInput(guest.max_guests.toString());
     setDialogOpen(true);
   };
 
@@ -169,7 +183,7 @@ export function AdminDashboard() {
     }
   };
 
-  const copyInvitationLink = (slug: string) => {
+  const copyInvitationLink = (slug: string, guest: Guest) => {
     const link = `${window.location.origin}/${slug}`;
     
     // Try to use clipboard API, fallback to alert if blocked
@@ -177,6 +191,12 @@ export function AdminDashboard() {
       navigator.clipboard.writeText(link)
         .then(() => {
           toast.success('Invitation link copied to clipboard');
+          // Show mark as sent dialog
+          const skipDialog = localStorage.getItem('skip_mark_sent_dialog') === 'true';
+          if (!skipDialog && !guest.link_sent) {
+            setGuestToMarkSent(guest);
+            setMarkSentDialogOpen(true);
+          }
         })
         .catch((err) => {
           console.error('Clipboard error:', err);
@@ -186,6 +206,33 @@ export function AdminDashboard() {
     } else {
       // Fallback - show the link in a toast for manual copy
       toast.success(`Link: ${link}`, { duration: 5000 });
+    }
+  };
+
+  const toggleLinkSent = async (guestId: string, currentStatus: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('guests')
+        .update({ link_sent: !currentStatus })
+        .eq('id', guestId);
+
+      if (error) throw error;
+
+      // Update local state
+      setGuests(guests.map(g => 
+        g.id === guestId ? { ...g, link_sent: !currentStatus } : g
+      ));
+
+      toast.success(`Marked as ${!currentStatus ? 'sent' : 'not sent'}`);
+    } catch (error) {
+      console.error('Error updating link_sent:', error);
+      toast.error('Failed to update status');
+    }
+  };
+
+  const handleMarkSentConfirm = async () => {
+    if (guestToMarkSent) {
+      await toggleLinkSent(guestToMarkSent.id, guestToMarkSent.link_sent);
     }
   };
 
@@ -199,6 +246,7 @@ export function AdminDashboard() {
       plus_one_allowed: false,
       max_guests: 1,
     });
+    setMaxGuestsInput('1');
     setEditingGuest(null);
   };
 
@@ -241,6 +289,28 @@ export function AdminDashboard() {
       </div>
     );
   }
+
+  // Filter and search guests
+  const filteredGuests = guests.filter(guest => {
+    // Apply search filter
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch = 
+      guest.name.toLowerCase().includes(searchLower) ||
+      guest.email?.toLowerCase().includes(searchLower) ||
+      guest.phone?.toLowerCase().includes(searchLower) ||
+      guest.custom_message?.toLowerCase().includes(searchLower);
+
+    if (!matchesSearch) return false;
+
+    // Apply sent filter
+    if (sentFilter === 'sent') return guest.link_sent;
+    if (sentFilter === 'not-sent') return !guest.link_sent;
+    return true; // 'all'
+  });
+
+  // Calculate filter counts
+  const sentCount = guests.filter(g => g.link_sent).length;
+  const notSentCount = guests.filter(g => !g.link_sent).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-yellow-50 p-4 md:p-8">
@@ -396,15 +466,17 @@ export function AdminDashboard() {
                     id="max_guests"
                     type="text"
                     inputMode="numeric"
-                    value={formData.max_guests.toString()}
+                    value={maxGuestsInput}
                     onChange={(e) => {
                       const value = e.target.value.replace(/[^0-9]/g, '');
                       if (value === '') {
                         setFormData({ ...formData, max_guests: 1 });
+                        setMaxGuestsInput('');
                       } else {
                         const numValue = parseInt(value);
                         if (numValue >= 1 && numValue <= 10) {
                           setFormData({ ...formData, max_guests: numValue });
+                          setMaxGuestsInput(value);
                         }
                       }
                     }}
@@ -451,25 +523,63 @@ export function AdminDashboard() {
                 <CardDescription>Manage your guests and track their RSVP status</CardDescription>
               </CardHeader>
               <CardContent>
+                {/* Search Bar */}
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Search guests by name, email, or phone..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10 h-11"
+                    />
+                  </div>
+                </div>
+
+                {/* Filter Tabs */}
+                <div className="flex gap-2 mb-6">
+                  <Button
+                    variant={sentFilter === 'all' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSentFilter('all')}
+                  >
+                    All ({guests.length})
+                  </Button>
+                  <Button
+                    variant={sentFilter === 'not-sent' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSentFilter('not-sent')}
+                  >
+                    Not Sent ({notSentCount})
+                  </Button>
+                  <Button
+                    variant={sentFilter === 'sent' ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setSentFilter('sent')}
+                  >
+                    Sent ({sentCount})
+                  </Button>
+                </div>
+
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Attending</TableHead>
-                      <TableHead>Plus One</TableHead>
+                      <TableHead>Sent</TableHead>
                       <TableHead>Contact</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {guests.map((guest) => {
+                    {filteredGuests.map((guest) => {
                       const rsvp = getGuestRSVP(guest.id);
                       const status = getRSVPStatus(guest.id);
                       const StatusIcon = status.icon;
                       
                       return (
-                        <TableRow key={guest.id}>
+                        <TableRow key={guest.id} className={guest.link_sent ? 'bg-green-50/30' : ''}>
                           <TableCell>{guest.name}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="gap-1">
@@ -489,11 +599,23 @@ export function AdminDashboard() {
                             )}
                           </TableCell>
                           <TableCell>
-                            {guest.plus_one_allowed ? (
-                              <Badge variant="secondary">Yes (max {guest.max_guests})</Badge>
-                            ) : (
-                              <Badge variant="outline">No</Badge>
-                            )}
+                            <div className="flex items-center gap-2">
+                              <Checkbox
+                                checked={guest.link_sent}
+                                onCheckedChange={() => toggleLinkSent(guest.id, guest.link_sent)}
+                                id={`sent-${guest.id}`}
+                              />
+                              <Label
+                                htmlFor={`sent-${guest.id}`}
+                                className="text-sm font-normal cursor-pointer"
+                              >
+                                {guest.link_sent ? (
+                                  <span className="text-green-600">✓</span>
+                                ) : (
+                                  <span className="text-gray-400">○</span>
+                                )}
+                              </Label>
+                            </div>
                           </TableCell>
                           <TableCell>
                             <div className="text-sm">
@@ -515,7 +637,7 @@ export function AdminDashboard() {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => copyInvitationLink(guest.slug)}
+                                onClick={() => copyInvitationLink(guest.slug, guest)}
                                 title="Copy Link"
                               >
                                 <Copy className="h-4 w-4" />
@@ -543,6 +665,11 @@ export function AdminDashboard() {
                     })}
                   </TableBody>
                 </Table>
+                {filteredGuests.length === 0 && guests.length > 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    No guests match your search or filter.
+                  </div>
+                )}
                 {guests.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     No guests added yet. Click "Add Guest" to get started.
@@ -602,6 +729,14 @@ export function AdminDashboard() {
             <EventSettings eventConfig={eventConfig} onConfigUpdate={(config) => setEventConfig(config)} />
           </TabsContent>
         </Tabs>
+
+        {/* Mark Sent Dialog */}
+        <MarkSentDialog
+          open={markSentDialogOpen}
+          onOpenChange={setMarkSentDialogOpen}
+          guestName={guestToMarkSent?.name || ''}
+          onConfirm={handleMarkSentConfirm}
+        />
       </div>
     </div>
   );
