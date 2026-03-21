@@ -10,16 +10,24 @@ interface PrenupCarouselProps {
   textColor: string;
 }
 
+const MAX_DOTS = 5;
+
 export function PrenupCarousel({ images, primaryColor, secondaryColor, textColor }: PrenupCarouselProps) {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   if (!images || images.length === 0) {
     return null;
   }
 
+  const total = images.length;
+  const half = Math.floor(MAX_DOTS / 2);
+  const startDot = Math.min(Math.max(activeSlide - half, 0), Math.max(total - MAX_DOTS, 0));
+  const visibleDots = Math.min(MAX_DOTS, total);
+
   const settings = {
-    dots: true,
+    dots: false,
     infinite: true,
     speed: 500,
     slidesToShow: 1,
@@ -30,13 +38,7 @@ export function PrenupCarousel({ images, primaryColor, secondaryColor, textColor
     arrows: false,
     centerMode: true,
     centerPadding: '80px',
-    dotsClass: 'slick-dots custom-dots',
-    customPaging: () => (
-      <div 
-        className="w-2 h-2 rounded-full transition-all"
-        style={{ backgroundColor: primaryColor }}
-      />
-    ),
+    beforeChange: (_: number, next: number) => setActiveSlide(next),
   };
 
   const openLightbox = (index: number) => {
@@ -74,12 +76,12 @@ export function PrenupCarousel({ images, primaryColor, secondaryColor, textColor
           <Slider {...settings}>
             {images.map((imageUrl, index) => (
               <div key={index} className="px-2">
-                <div 
+                <div
                   className="aspect-[3/4] rounded-3xl overflow-hidden shadow-lg cursor-pointer hover:opacity-95 transition-opacity"
                   onClick={() => openLightbox(index)}
                 >
-                  <img 
-                    src={imageUrl} 
+                  <img
+                    src={imageUrl}
                     alt={`Couple photo ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
@@ -87,33 +89,34 @@ export function PrenupCarousel({ images, primaryColor, secondaryColor, textColor
               </div>
             ))}
           </Slider>
+
+          {/* Windowed dot indicator — shows at most MAX_DOTS dots */}
+          <div className="flex justify-center items-center gap-2 mt-6">
+            {Array.from({ length: visibleDots }, (_, i) => {
+              const slideIndex = startDot + i;
+              const isActive = slideIndex === activeSlide;
+              return (
+                <div
+                  key={slideIndex}
+                  className="h-2 rounded-full transition-all duration-300"
+                  style={{
+                    backgroundColor: primaryColor,
+                    width: isActive ? '24px' : '8px',
+                    opacity: isActive ? 1 : 0.3,
+                  }}
+                />
+              );
+            })}
+          </div>
         </div>
         
         <style>{`
-          .prenup-carousel-container .slick-dots {
-            bottom: -40px;
-          }
-          
-          .prenup-carousel-container .slick-dots li {
-            margin: 0 4px;
-          }
-          
-          .prenup-carousel-container .slick-dots li div {
-            opacity: 0.3;
-          }
-          
-          .prenup-carousel-container .slick-dots li.slick-active div {
-            opacity: 1;
-            width: 24px;
-            border-radius: 4px;
-          }
-          
           .prenup-carousel-container .slick-slide {
             transition: all 300ms ease;
             opacity: 0.5;
             transform: scale(0.9);
           }
-          
+
           .prenup-carousel-container .slick-slide.slick-center {
             opacity: 1;
             transform: scale(1);
