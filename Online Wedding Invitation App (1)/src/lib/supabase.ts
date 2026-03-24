@@ -19,6 +19,7 @@ export interface RSVP {
   guest_id: string;
   attending: boolean;
   guest_count: number;
+  guest_names?: string;
   message?: string;
   meal_preference?: string;
   dietary_restrictions?: string;
