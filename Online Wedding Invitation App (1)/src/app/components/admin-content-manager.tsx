@@ -509,7 +509,7 @@ export function AdminContentManager() {
                   <Button
                     variant="destructive"
                     size="sm"
-                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute -top-2 -right-2 h-6 w-6 p-0 rounded-full"
                     onClick={() => deleteColor(index)}
                   >
                     <Trash2 className="h-3 w-3" />
