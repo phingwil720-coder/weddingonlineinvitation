@@ -34,6 +34,7 @@ export function AdminDashboardMobile() {
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('');
   const [sentFilter, setSentFilter] = useState<'all' | 'sent' | 'not-sent'>('all');
+  const [rsvpFilter, setRsvpFilter] = useState<'all' | 'confirmed' | 'pending' | 'declined'>('all');
   
   // Mark sent dialog state
   const [markSentDialogOpen, setMarkSentDialogOpen] = useState(false);
@@ -283,7 +284,7 @@ export function AdminDashboardMobile() {
   const filteredGuests = guests.filter(guest => {
     // Apply search filter
     const searchLower = searchQuery.toLowerCase();
-    const matchesSearch = 
+    const matchesSearch =
       guest.name.toLowerCase().includes(searchLower) ||
       guest.email?.toLowerCase().includes(searchLower) ||
       guest.phone?.toLowerCase().includes(searchLower) ||
@@ -292,14 +293,26 @@ export function AdminDashboardMobile() {
     if (!matchesSearch) return false;
 
     // Apply sent filter
-    if (sentFilter === 'sent') return guest.link_sent;
-    if (sentFilter === 'not-sent') return !guest.link_sent;
-    return true; // 'all'
+    if (sentFilter === 'sent' && !guest.link_sent) return false;
+    if (sentFilter === 'not-sent' && guest.link_sent) return false;
+
+    // Apply RSVP filter
+    if (rsvpFilter !== 'all') {
+      const rsvp = getGuestRSVP(guest.id);
+      if (rsvpFilter === 'confirmed' && (!rsvp || !rsvp.attending)) return false;
+      if (rsvpFilter === 'declined' && (!rsvp || rsvp.attending)) return false;
+      if (rsvpFilter === 'pending' && rsvp) return false;
+    }
+
+    return true;
   });
 
   // Calculate filter counts
   const sentCount = guests.filter(g => g.link_sent).length;
   const notSentCount = guests.filter(g => !g.link_sent).length;
+  const confirmedCount = rsvps.filter(r => r.attending).length;
+  const declinedCount = rsvps.filter(r => !r.attending).length;
+  const pendingCount = guests.length - rsvps.length;
 
   return (
     <div className="min-h-screen bg-white font-['Montserrat']">
@@ -379,8 +392,8 @@ export function AdminDashboardMobile() {
               </div>
             </div>
 
-            {/* Filter Buttons */}
-            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+            {/* Filter Buttons - Sent */}
+            <div className="flex gap-2 mb-2 overflow-x-auto pb-2">
               <Button
                 variant={sentFilter === 'all' ? 'default' : 'outline'}
                 size="sm"
@@ -404,6 +417,48 @@ export function AdminDashboardMobile() {
                 className="rounded-full whitespace-nowrap"
               >
                 Sent ({sentCount})
+              </Button>
+            </div>
+
+            {/* Filter Buttons - RSVP Status */}
+            <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+              <Button
+                variant={rsvpFilter === 'all' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setRsvpFilter('all')}
+                className="rounded-full whitespace-nowrap"
+              >
+                All RSVPs
+              </Button>
+              <Button
+                variant={rsvpFilter === 'confirmed' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setRsvpFilter('confirmed')}
+                className="rounded-full whitespace-nowrap"
+                style={rsvpFilter === 'confirmed' ? { backgroundColor: '#16a34a', borderColor: '#16a34a' } : { borderColor: '#16a34a', color: '#16a34a' }}
+              >
+                <CheckCircle className="h-3 w-3 mr-1" />
+                Confirmed ({confirmedCount})
+              </Button>
+              <Button
+                variant={rsvpFilter === 'pending' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setRsvpFilter('pending')}
+                className="rounded-full whitespace-nowrap"
+                style={rsvpFilter === 'pending' ? { backgroundColor: '#64748b', borderColor: '#64748b' } : { borderColor: '#64748b', color: '#64748b' }}
+              >
+                <Clock className="h-3 w-3 mr-1" />
+                Pending ({pendingCount})
+              </Button>
+              <Button
+                variant={rsvpFilter === 'declined' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setRsvpFilter('declined')}
+                className="rounded-full whitespace-nowrap"
+                style={rsvpFilter === 'declined' ? { backgroundColor: '#dc2626', borderColor: '#dc2626' } : { borderColor: '#dc2626', color: '#dc2626' }}
+              >
+                <XCircle className="h-3 w-3 mr-1" />
+                Declined ({declinedCount})
               </Button>
             </div>
 
@@ -463,7 +518,12 @@ export function AdminDashboardMobile() {
                     {rsvp && (
                       <div className="mb-3 text-sm text-slate-600">
                         {rsvp.attending ? (
-                          <span className="text-green-600">✓ {rsvp.guest_count} guest(s) attending</span>
+                          <div className="text-green-600 space-y-0.5">
+                            <div>✓ {rsvp.guest_count} guest(s) attending</div>
+                            {rsvp.guest_names && (
+                              <div className="text-xs text-slate-500 pl-3">{rsvp.guest_names}</div>
+                            )}
+                          </div>
                         ) : (
                           <span className="text-red-600">✗ Declined</span>
                         )}
