@@ -703,33 +703,39 @@ export function AdminDashboardMobile() {
 
               {formData.plus_one_allowed && (
                 <div>
-                  <Label htmlFor="max_guests" className="mb-3 block text-base">Total Party Size</Label>
-                  <Input
-                    id="max_guests"
-                    type="text"
-                    inputMode="numeric"
-                    value={maxGuestsInput}
-                    onChange={(e) => {
-                      const value = e.target.value.replace(/[^0-9]/g, '');
-                      setMaxGuestsInput(value);
-                      if (value !== '') {
-                        const numValue = parseInt(value);
-                        if (numValue >= 1 && numValue <= 10) {
-                          setFormData({ ...formData, max_guests: numValue });
-                        }
-                      }
-                    }}
-                    onBlur={() => {
-                      // Set to 1 if empty on blur
-                      if (maxGuestsInput === '') {
-                        setMaxGuestsInput('1');
-                        setFormData({ ...formData, max_guests: 1 });
-                      }
-                    }}
-                    placeholder="2"
-                    className="rounded-xl h-12 text-base"
-                  />
-                  <p className="text-xs text-slate-500 mt-2">Total attendees including the primary guest (1-10)</p>
+                  <Label className="mb-3 block text-base">Total Party Size</Label>
+                  <div className="flex items-center gap-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = Math.max(2, formData.max_guests - 1);
+                        setFormData({ ...formData, max_guests: next });
+                        setMaxGuestsInput(String(next));
+                      }}
+                      disabled={formData.max_guests <= 2}
+                      className="w-12 h-12 rounded-full border-2 text-xl font-semibold flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      style={{ borderColor: '#7A9173', color: '#7A9173' }}
+                    >
+                      −
+                    </button>
+                    <span className="text-2xl font-semibold w-8 text-center text-foreground">
+                      {formData.max_guests}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const next = Math.min(10, formData.max_guests + 1);
+                        setFormData({ ...formData, max_guests: next });
+                        setMaxGuestsInput(String(next));
+                      }}
+                      disabled={formData.max_guests >= 10}
+                      className="w-12 h-12 rounded-full border-2 text-xl font-semibold flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      style={{ borderColor: '#7A9173', color: '#7A9173' }}
+                    >
+                      +
+                    </button>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-2">Total attendees including the primary guest (max 10)</p>
                 </div>
               )}
 
