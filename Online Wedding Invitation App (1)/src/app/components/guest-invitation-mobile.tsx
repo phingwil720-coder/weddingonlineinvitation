@@ -439,7 +439,11 @@ export function GuestInvitationMobile() {
                 <Label className="text-base mb-4 block text-foreground">Will you be attending?</Label>
                 <RadioGroup
                   value={formData.attending}
-                  onValueChange={(value) => setFormData({ ...formData, attending: value })}
+                  onValueChange={(value) => setFormData({
+                    ...formData,
+                    attending: value,
+                    guest_count: value === 'yes' && guest.plus_one_allowed ? Math.max(2, formData.guest_count) : formData.guest_count
+                  })}
                   required
                   className="space-y-3"
                 >
@@ -474,34 +478,34 @@ export function GuestInvitationMobile() {
                 <div className="space-y-6 pt-4">
                   {guest.plus_one_allowed && (
                     <div>
-                      <Label htmlFor="guest_count" className="text-base mb-3 block text-foreground">
+                      <Label className="text-base mb-3 block text-foreground">
                         How many people total? (including you)
                       </Label>
-                      <Input
-                        id="guest_count"
-                        type="number"
-                        min="1"
-                        max={guest.max_guests}
-                        value={formData.guest_count}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          // Allow empty string or valid numbers
-                          setFormData({ 
-                            ...formData, 
-                            guest_count: value === '' ? 0 : parseInt(value) || 0
-                          });
-                        }}
-                        onBlur={(e) => {
-                          // On blur, ensure minimum of 1
-                          if (formData.guest_count < 1) {
-                            setFormData({ ...formData, guest_count: 1 });
-                          }
-                        }}
-                        required
-                        className="rounded-xl py-6 text-base"
-                      />
-                      <p className="text-sm mt-2 text-muted-foreground">
-                        You can bring up to {guest.max_guests} {guest.max_guests === 1 ? 'person' : 'people'} total
+                      <div className="flex items-center gap-4">
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, guest_count: Math.max(2, formData.guest_count - 1) })}
+                          disabled={formData.guest_count <= 2}
+                          className="w-12 h-12 rounded-full border-2 text-xl font-semibold flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
+                        >
+                          −
+                        </button>
+                        <span className="text-2xl font-semibold w-8 text-center" style={{ color: 'var(--color-foreground)' }}>
+                          {formData.guest_count}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setFormData({ ...formData, guest_count: Math.min(guest.max_guests, formData.guest_count + 1) })}
+                          disabled={formData.guest_count >= guest.max_guests}
+                          className="w-12 h-12 rounded-full border-2 text-xl font-semibold flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                          style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
+                        >
+                          +
+                        </button>
+                      </div>
+                      <p className="text-sm mt-3 text-muted-foreground">
+                        You can bring up to {guest.max_guests - 1} additional {guest.max_guests - 1 === 1 ? 'guest' : 'guests'}
                       </p>
                     </div>
                   )}
