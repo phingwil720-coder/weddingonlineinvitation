@@ -516,7 +516,7 @@ export function AdminDashboardMobile() {
                     </div>
 
                     {rsvp && (
-                      <div className="mb-3 text-sm text-slate-600">
+                      <div className="mb-3 text-sm text-slate-600 space-y-1">
                         {rsvp.attending ? (
                           <div className="text-green-600 space-y-0.5">
                             <div>✓ {rsvp.guest_count} guest(s) attending</div>
@@ -526,6 +526,11 @@ export function AdminDashboardMobile() {
                           </div>
                         ) : (
                           <span className="text-red-600">✗ Declined</span>
+                        )}
+                        {rsvp.message && (
+                          <div className="text-xs text-slate-500 italic border-l-2 border-slate-200 pl-2 mt-1">
+                            "{rsvp.message}"
+                          </div>
                         )}
                       </div>
                     )}
@@ -683,6 +688,7 @@ export function AdminDashboardMobile() {
                 <Switch
                   id="plus_one"
                   checked={formData.plus_one_allowed}
+                  className="data-[state=unchecked]:bg-slate-300"
                   onCheckedChange={(checked) => {
                     setFormData({ 
                       ...formData, 
