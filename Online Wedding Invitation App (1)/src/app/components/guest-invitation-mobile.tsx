@@ -439,11 +439,7 @@ export function GuestInvitationMobile() {
                 <Label className="text-base mb-4 block text-foreground">Will you be attending?</Label>
                 <RadioGroup
                   value={formData.attending}
-                  onValueChange={(value) => setFormData({
-                    ...formData,
-                    attending: value,
-                    guest_count: value === 'yes' && guest.plus_one_allowed ? Math.max(2, formData.guest_count) : formData.guest_count
-                  })}
+                  onValueChange={(value) => setFormData({ ...formData, attending: value, guest_count: 1 })}
                   required
                   className="space-y-3"
                 >
@@ -484,8 +480,8 @@ export function GuestInvitationMobile() {
                       <div className="flex items-center gap-4">
                         <button
                           type="button"
-                          onClick={() => setFormData({ ...formData, guest_count: Math.max(2, formData.guest_count - 1) })}
-                          disabled={formData.guest_count <= 2}
+                          onClick={() => setFormData({ ...formData, guest_count: Math.max(1, formData.guest_count - 1) })}
+                          disabled={formData.guest_count <= 1}
                           className="w-12 h-12 rounded-full border-2 text-xl font-semibold flex items-center justify-center transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                           style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
                         >
